@@ -417,8 +417,8 @@
             <div id="loginError" class="error-message hidden"></div>
             <form id="loginForm">
                 <div class="form-group">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" class="form-control" required>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" class="form-control" required>
                 </div>
                 <div class="form-group">
                     <label for="password">Password:</label>
@@ -426,9 +426,65 @@
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
             </form>
-            <p style="margin-top: 1rem; text-align: center; color: var(--gray-600); font-size: 0.875rem;">
-                Default login: admin / admin123
+            <div style="margin-top: 1rem; text-align: center;">
+                <a href="#" id="forgotPasswordLink" style="color: var(--primary-blue); text-decoration: none; font-size: 0.875rem;">
+                    Forgot your password?
+                </a>
+            </div>
+            <div style="margin-top: 1rem; text-align: center;">
+                <p style="color: var(--gray-600); margin-bottom: 0.5rem; font-size: 0.875rem;">Don't have an account?</p>
+                <a href="/register" style="color: var(--primary-blue); text-decoration: none; font-size: 0.875rem;">
+                    Create a new account
+                </a>
+            </div>
+        </div>
+
+        <!-- Password Reset Request Form -->
+        <div id="passwordResetSection" class="login-form hidden">
+            <h2>Reset Password</h2>
+            <p style="margin-bottom: 1rem; color: var(--gray-600);">
+                Enter your email address and we'll send you a link to reset your password.
             </p>
+            <div id="resetError" class="error-message hidden"></div>
+            <div id="resetSuccess" class="success-message hidden"></div>
+            <form id="passwordResetForm">
+                <div class="form-group">
+                    <label for="resetEmail">Email:</label>
+                    <input type="email" id="resetEmail" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Send Reset Link</button>
+            </form>
+            <div style="margin-top: 1rem; text-align: center;">
+                <a href="#" id="backToLoginLink" style="color: var(--primary-blue); text-decoration: none; font-size: 0.875rem;">
+                    Back to Login
+                </a>
+            </div>
+        </div>
+
+        <!-- Password Change Form (for forced password change) -->
+        <div id="passwordChangeSection" class="login-form hidden">
+            <h2>Change Password</h2>
+            <p style="margin-bottom: 1rem; color: var(--amber-500); font-weight: 500;">
+                You must change your default password before continuing.
+            </p>
+            <div id="changeError" class="error-message hidden"></div>
+            <div id="changeSuccess" class="success-message hidden"></div>
+            <form id="passwordChangeForm">
+                <div class="form-group">
+                    <label for="currentPassword">Current Password:</label>
+                    <input type="password" id="currentPassword" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">New Password:</label>
+                    <input type="password" id="newPassword" class="form-control" required minlength="6">
+                    <small style="color: var(--gray-600);">Minimum 6 characters</small>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm New Password:</label>
+                    <input type="password" id="confirmPassword" class="form-control" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Change Password</button>
+            </form>
         </div>
 
         <!-- Dashboard -->

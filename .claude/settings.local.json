@@ -7,7 +7,12 @@
       "Bash(taskkill:*)",
       "Bash(node:*)",
       "Bash(PORT=3001 node server.js)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(PORT=3002 node server.js)",
+      "Bash(curl:*)",
+      "Bash(move:*)",
+      "Bash(mv:*)",
+      "Bash(set PORT=3003)"
     ],
     "deny": []
   }

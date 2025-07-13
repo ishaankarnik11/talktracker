@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-container { max-width: 600px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        #log { background: #f8f9fa; padding: 10px; border-radius: 3px; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔍 Registration Debug Test</h1>
+        
+        <div class="test-section info">
+            <h3>📋 Test Information</h3>
+            <p>This page tests the registration functionality to identify why browser submissions may not be working.</p>
+            <p><strong>Current URL:</strong> <span id="currentUrl"></span></p>
+            <p><strong>User Agent:</strong> <span id="userAgent"></span></p>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Test Registration API</h3>
+            <button onclick="testRegistration()">Test Registration Endpoint</button>
+            <button onclick="testWithFetch()">Test with Fetch API</button>
+            <button onclick="testWithXHR()">Test with XMLHttpRequest</button>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📝 Test Log</h3>
+            <div id="log"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 Quick Form Test</h3>
+            <form id="testForm">
+                <p>
+                    <label>Username: <input type="text" id="testUsername" value="quicktest" required></label>
+                </p>
+                <p>
+                    <label>Email: <input type="email" id="testEmail" value="quicktest@example.com" required></label>
+                </p>
+                <p>
+                    <label>Password: <input type="password" id="testPassword" value="quickpass123" required></label>
+                </p>
+                <button type="submit">Submit Form Test</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Initialize page info
+        document.getElementById('currentUrl').textContent = window.location.href;
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+            logElement.textContent += logEntry;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(logEntry);
+        }
+
+        function clearLog() {
+            document.getElementById('log').textContent = '';
+        }
+
+        async function testRegistration() {
+            log('🔍 Starting registration endpoint test...');
+            
+            const testData = {
+                username: 'apitest_' + Date.now(),
+                email: `apitest_${Date.now()}@example.com`,
+                password: 'testpass123'
+            };
+
+            log(`📤 Testing with data: ${JSON.stringify(testData)}`);
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                log(`📊 Response status: ${response.status}`);
+                log(`📋 Response headers: ${JSON.stringify(Object.fromEntries(response.headers))}`);
+
+                const data = await response.json();
+                log(`📨 Response data: ${JSON.stringify(data, null, 2)}`);
+
+                if (data.success) {
+                    log('✅ Registration test PASSED!', 'success');
+                } else {
+                    log('❌ Registration test FAILED!', 'error');
+                }
+
+            } catch (error) {
+                log(`❌ Registration test ERROR: ${error.message}`, 'error');
+                log(`📋 Error details: ${error.stack}`, 'error');
+            }
+        }
+
+        async function testWithFetch() {
+            log('🔍 Testing with Fetch API...');
+            await testRegistration();
+        }
+
+        function testWithXHR() {
+            log('🔍 Testing with XMLHttpRequest...');
+
+            const testData = {
+                username: 'xhrtest_' + Date.now(),
+                email: `xhrtest_${Date.now()}@example.com`,
+                password: 'testpass123'
+            };
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/register', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            xhr.onload = function() {
+                log(`📊 XHR Response status: ${xhr.status}`);
+                try {
+                    const data = JSON.parse(xhr.responseText);
+                    log(`📨 XHR Response data: ${JSON.stringify(data, null, 2)}`);
+                    
+                    if (data.success) {
+                        log('✅ XHR Registration test PASSED!', 'success');
+                    } else {
+                        log('❌ XHR Registration test FAILED!', 'error');
+                    }
+                } catch (error) {
+                    log(`❌ XHR Parse error: ${error.message}`, 'error');
+                }
+            };
+
+            xhr.onerror = function() {
+                log('❌ XHR Network error occurred', 'error');
+            };
+
+            xhr.send(JSON.stringify(testData));
+        }
+
+        // Form test
+        document.getElementById('testForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            log('🔍 Testing form submission...');
+
+            const formData = {
+                username: document.getElementById('testUsername').value,
+                email: document.getElementById('testEmail').value,
+                password: document.getElementById('testPassword').value
+            };
+
+            log(`📤 Form data: ${JSON.stringify(formData)}`);
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                log(`📨 Form response: ${JSON.stringify(data, null, 2)}`);
+
+                if (data.success) {
+                    log('✅ Form submission test PASSED!', 'success');
+                } else {
+                    log('❌ Form submission test FAILED!', 'error');
+                }
+
+            } catch (error) {
+                log(`❌ Form submission ERROR: ${error.message}`, 'error');
+            }
+        });
+
+        // Auto-run a test on page load
+        window.addEventListener('load', function() {
+            log('🚀 Page loaded, running initial test...');
+            setTimeout(() => {
+                testRegistration();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -18,6 +18,29 @@ class TalkTracker {
             this.login();
         });
 
+        // Password reset request form
+        document.getElementById('passwordResetForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.requestPasswordReset();
+        });
+
+        // Password change form (forced)
+        document.getElementById('passwordChangeForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.changePassword();
+        });
+
+        // Navigation links
+        document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showPasswordReset();
+        });
+
+        document.getElementById('backToLoginLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showLogin();
+        });
+
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
             this.logout();
@@ -80,7 +103,7 @@ class TalkTracker {
     }
 
     async login() {
-        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const errorDiv = document.getElementById('loginError');
 
@@ -90,22 +113,101 @@ class TalkTracker {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ email, password }),
             });
 
             const data = await response.json();
 
             if (data.success) {
                 this.currentUser = data.user;
-                this.showDashboard();
-                this.loadInteractions();
-                this.loadStats();
+                
+                // Check if password change is required
+                if (data.requirePasswordChange) {
+                    this.showPasswordChange();
+                } else {
+                    this.showDashboard();
+                    this.loadInteractions();
+                    this.loadStats();
+                }
             } else {
                 this.showError(errorDiv, data.error || 'Login failed');
             }
         } catch (error) {
             console.error('Login error:', error);
             this.showError(errorDiv, 'Login failed. Please try again.');
+        }
+    }
+
+    async requestPasswordReset() {
+        const email = document.getElementById('resetEmail').value;
+        const errorDiv = document.getElementById('resetError');
+        const successDiv = document.getElementById('resetSuccess');
+
+        try {
+            const response = await fetch('/api/request-password-reset', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.showSuccess(successDiv, data.message);
+                document.getElementById('passwordResetForm').reset();
+            } else {
+                this.showError(errorDiv, data.error || 'Password reset failed');
+            }
+        } catch (error) {
+            console.error('Password reset error:', error);
+            this.showError(errorDiv, 'Password reset failed. Please try again.');
+        }
+    }
+
+    async changePassword() {
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const errorDiv = document.getElementById('changeError');
+        const successDiv = document.getElementById('changeSuccess');
+
+        // Validation
+        if (newPassword !== confirmPassword) {
+            this.showError(errorDiv, 'New passwords do not match');
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            this.showError(errorDiv, 'Password must be at least 6 characters long');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ currentPassword, newPassword }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.showSuccess(successDiv, 'Password changed successfully! Redirecting to dashboard...');
+                setTimeout(() => {
+                    this.showDashboard();
+                    this.loadInteractions();
+                    this.loadStats();
+                }, 2000);
+            } else {
+                this.showError(errorDiv, data.error || 'Password change failed');
+            }
+        } catch (error) {
+            console.error('Password change error:', error);
+            this.showError(errorDiv, 'Password change failed. Please try again.');
         }
     }
 
@@ -121,13 +223,37 @@ class TalkTracker {
 
     showLogin() {
         document.getElementById('loginSection').style.display = 'block';
+        document.getElementById('passwordResetSection').classList.add('hidden');
+        document.getElementById('passwordChangeSection').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('active');
         document.getElementById('loginForm').reset();
         this.hideMessage(document.getElementById('loginError'));
     }
 
+    showPasswordReset() {
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('passwordResetSection').classList.remove('hidden');
+        document.getElementById('passwordChangeSection').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('active');
+        document.getElementById('passwordResetForm').reset();
+        this.hideMessage(document.getElementById('resetError'));
+        this.hideMessage(document.getElementById('resetSuccess'));
+    }
+
+    showPasswordChange() {
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('passwordResetSection').classList.add('hidden');
+        document.getElementById('passwordChangeSection').classList.remove('hidden');
+        document.getElementById('dashboard').classList.remove('active');
+        document.getElementById('passwordChangeForm').reset();
+        this.hideMessage(document.getElementById('changeError'));
+        this.hideMessage(document.getElementById('changeSuccess'));
+    }
+
     showDashboard() {
         document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('passwordResetSection').classList.add('hidden');
+        document.getElementById('passwordChangeSection').classList.add('hidden');
         document.getElementById('dashboard').classList.add('active');
         document.getElementById('currentUser').textContent = this.currentUser.username;
         

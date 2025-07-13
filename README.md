@@ -5,7 +5,9 @@ A complete web application for tracking and analyzing daily interpersonal intera
 ## Features
 
 ### Client Interface
-- **Secure Authentication**: Session-based login system
+- **User Registration**: Self-service account creation with email verification
+- **Email-Based Authentication**: Secure login with email addresses  
+- **Password Reset**: Email-based password recovery system
 - **Interactive Dashboard**: Real-time statistics and quick reference guide
 - **Easy Interaction Logging**: Intuitive forms with validation
 - **Advanced Filtering**: Search and filter by date, person, type, and keywords
@@ -42,10 +44,17 @@ A complete web application for tracking and analyzing daily interpersonal intera
    - Client Interface: http://localhost:3000
    - Therapist Dashboard: http://localhost:3000/therapist
 
-## Default Login
+## Getting Started
 
-- **Username:** admin
-- **Password:** admin123
+1. **Visit the application:** http://localhost:3000
+2. **Create an account:** Click "Create a new account" on the login page
+3. **Register with your details:**
+   - Choose a username (3-30 characters)
+   - Enter your email address
+   - Create a secure password (6+ characters)
+4. **Start tracking:** Login and begin logging your interactions
+
+**Note:** No default accounts exist - all users must register their own accounts for security.
 
 ## Interaction Types Framework
 
@@ -165,6 +174,30 @@ CREATE TABLE interactions (
 ### Environment Variables
 - `SESSION_SECRET` - Secret key for session management (change in production)
 - `PORT` - Server port (default: 3000)
+- `SMTP_HOST` - SMTP server host (default: smtp.gmail.com)
+- `SMTP_PORT` - SMTP server port (default: 587)
+- `SMTP_USER` - SMTP username/email for sending emails
+- `SMTP_PASS` - SMTP password or app password
+
+### Email Configuration
+For password reset functionality to work in production, configure your SMTP settings:
+
+1. **Gmail Example:**
+   ```bash
+   export SMTP_HOST=smtp.gmail.com
+   export SMTP_PORT=587
+   export SMTP_USER=your-email@gmail.com
+   export SMTP_PASS=your-app-password
+   ```
+
+2. **During Development:**
+   - Password reset links are logged to the console
+   - No actual emails are sent unless in production mode
+
+3. **Gmail App Password Setup:**
+   - Enable 2-factor authentication on your Gmail account
+   - Generate an app password for the application
+   - Use the app password in `SMTP_PASS`
 
 ### Production Deployment
 1. Set `NODE_ENV=production`
