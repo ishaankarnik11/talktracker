@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talk Tracker - Interaction Tracking</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #2563eb;
+            --primary-green: #059669;
+            --light-blue: #dbeafe;
+            --light-green: #d1fae5;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --red-500: #ef4444;
+            --orange-500: #f97316;
+            --amber-500: #f59e0b;
+            --emerald-500: #10b981;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-green));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .login-form {
+            max-width: 400px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--gray-200);
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--gray-800);
+        }
+
+        .card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--gray-700);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: var(--gray-600);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--gray-800);
+        }
+
+        .btn-success {
+            background-color: var(--emerald-500);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #059669;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .interaction-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .interaction-type {
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .interaction-type.discussion {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .interaction-type.disagreement {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+
+        .interaction-type.debate {
+            background-color: #fed7aa;
+            color: #ea580c;
+        }
+
+        .interaction-type.confrontation {
+            background-color: #fecaca;
+            color: #dc2626;
+        }
+
+        .interaction-type.selected {
+            border-color: currentColor;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .interaction-type h4 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .interaction-type p {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 1rem;
+            background: var(--gray-100);
+            border-radius: 8px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-top: 0.25rem;
+        }
+
+        .interactions-table {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        th {
+            background-color: var(--gray-50);
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        tr:hover {
+            background-color: var(--gray-50);
+        }
+
+        .type-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .type-discussion { background-color: #dbeafe; color: #1e40af; }
+        .type-disagreement { background-color: #fef3c7; color: #d97706; }
+        .type-debate { background-color: #fed7aa; color: #ea580c; }
+        .type-confrontation { background-color: #fecaca; color: #dc2626; }
+
+        .search-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-filters input,
+        .search-filters select {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .error-message, .success-message {
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            background-color: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .success-message {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .search-filters {
+                flex-direction: column;
+            }
+
+            .search-filters input,
+            .search-filters select {
+                min-width: auto;
+            }
+
+            .interaction-types {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .user-info {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            table {
+                font-size: 0.75rem;
+            }
+
+            th, td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Talk Tracker</h1>
+            <p>Track and analyze your daily interactions</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Login Form -->
+        <div id="loginSection" class="login-form">
+            <h2>Login</h2>
+            <div id="loginError" class="error-message hidden"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+            </form>
+            <p style="margin-top: 1rem; text-align: center; color: var(--gray-600); font-size: 0.875rem;">
+                Default login: admin / admin123
+            </p>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="dashboard">
+            <!-- User Info -->
+            <div class="user-info">
+                <div>
+                    <strong>Welcome, <span id="currentUser"></span>!</strong>
+                </div>
+                <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+            </div>
+
+            <!-- Therapist Access Information -->
+            <div class="card" style="background: var(--light-green); border: 1px solid var(--primary-green);">
+                <h2>Share with Therapist</h2>
+                <p style="margin-bottom: 1rem; color: var(--gray-700);">
+                    Share these details with your therapist to give them read-only access to your interaction data:
+                </p>
+                
+                <div style="background: white; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <h3 style="margin-bottom: 0.5rem;">Option 1: Direct Link (Recommended)</h3>
+                    <p style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.5rem;">
+                        Copy and send this link to your therapist:
+                    </p>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="text" id="therapistDirectLink" class="form-control" readonly 
+                               style="font-family: monospace; font-size: 0.875rem;">
+                        <button id="copyLinkBtn" class="btn btn-primary btn-small">Copy Link</button>
+                    </div>
+                </div>
+
+                <div style="background: white; padding: 1rem; border-radius: 8px;">
+                    <h3 style="margin-bottom: 0.5rem;">Option 2: Manual Access</h3>
+                    <p style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.5rem;">
+                        If your therapist prefers to enter details manually:
+                    </p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="font-weight: 600; font-size: 0.875rem;">Client ID:</label>
+                            <input type="text" id="clientIdDisplay" class="form-control" readonly 
+                                   style="font-family: monospace; background: var(--gray-100);">
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; font-size: 0.875rem;">Access Token:</label>
+                            <input type="text" id="accessTokenDisplay" class="form-control" readonly 
+                                   style="font-family: monospace; background: var(--gray-100);">
+                        </div>
+                    </div>
+                    <p style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.5rem;">
+                        Therapist Dashboard URL: <code>http://localhost:3000/therapist</code>
+                    </p>
+                </div>
+            </div>
+
+            <div id="dashboardError" class="error-message hidden"></div>
+            <div id="dashboardSuccess" class="success-message hidden"></div>
+
+            <div class="grid grid-2">
+                <!-- Quick Reference Guide -->
+                <div class="card">
+                    <h2>Interaction Types</h2>
+                    <div class="interaction-types" id="interactionTypesGuide">
+                        <div class="interaction-type discussion">
+                            <h4>Discussion</h4>
+                            <p>Collaborative, calm, curious exchange of ideas</p>
+                        </div>
+                        <div class="interaction-type disagreement">
+                            <h4>Disagreement</h4>
+                            <p>Different views but respectful, no personal conflict</p>
+                        </div>
+                        <div class="interaction-type debate">
+                            <h4>Debate</h4>
+                            <p>Structured defense of ideas, energetic but not personal</p>
+                        </div>
+                        <div class="interaction-type confrontation">
+                            <h4>Confrontation</h4>
+                            <p>Personal challenge, emotionally charged interaction</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="card">
+                    <h2>Your Statistics</h2>
+                    <div class="stats-grid" id="statsContainer">
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalInteractions">0</div>
+                            <div class="stat-label">Total Interactions</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="weeklyInteractions">0</div>
+                            <div class="stat-label">This Week</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="discussionCount">0</div>
+                            <div class="stat-label">Discussions</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="disagreementCount">0</div>
+                            <div class="stat-label">Disagreements</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="debateCount">0</div>
+                            <div class="stat-label">Debates</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="confrontationCount">0</div>
+                            <div class="stat-label">Confrontations</div>
+                        </div>
+                    </div>
+                    <button id="exportBtn" class="btn btn-success btn-small">Export CSV</button>
+                </div>
+            </div>
+
+            <!-- Add New Interaction -->
+            <div class="card">
+                <h2>Add New Interaction</h2>
+                <form id="interactionForm">
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label for="interactionDate">Date:</label>
+                            <input type="date" id="interactionDate" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="interactionTime">Time:</label>
+                            <input type="time" id="interactionTime" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="interactionPerson">Person Involved:</label>
+                        <input type="text" id="interactionPerson" class="form-control" required 
+                               placeholder="e.g., John, Colleague, Family member">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Interaction Type:</label>
+                        <div class="interaction-types" id="interactionTypesSelector">
+                            <div class="interaction-type discussion" data-type="Discussion">
+                                <h4>Discussion</h4>
+                            </div>
+                            <div class="interaction-type disagreement" data-type="Disagreement">
+                                <h4>Disagreement</h4>
+                            </div>
+                            <div class="interaction-type debate" data-type="Debate">
+                                <h4>Debate</h4>
+                            </div>
+                            <div class="interaction-type confrontation" data-type="Confrontation">
+                                <h4>Confrontation</h4>
+                            </div>
+                        </div>
+                        <input type="hidden" id="selectedInteractionType" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="interactionContext">Context/Situation:</label>
+                        <textarea id="interactionContext" class="form-control" 
+                                  placeholder="Describe the situation that led to this interaction..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="interactionResponse">Your Response:</label>
+                        <textarea id="interactionResponse" class="form-control" 
+                                  placeholder="How did you respond? What did you say or do?"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="interactionReflection">Reflection:</label>
+                        <textarea id="interactionReflection" class="form-control" 
+                                  placeholder="What did you learn? How might you handle it differently?"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Add Interaction</button>
+                </form>
+            </div>
+
+            <!-- Interactions List -->
+            <div class="card">
+                <h2>Your Interactions</h2>
+                
+                <div class="search-filters">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search interactions...">
+                    <select id="filterType" class="form-control">
+                        <option value="">All Types</option>
+                        <option value="Discussion">Discussion</option>
+                        <option value="Disagreement">Disagreement</option>
+                        <option value="Debate">Debate</option>
+                        <option value="Confrontation">Confrontation</option>
+                    </select>
+                    <input type="text" id="filterPerson" class="form-control" placeholder="Filter by person...">
+                </div>
+
+                <div class="interactions-table">
+                    <table id="interactionsTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Person</th>
+                                <th>Type</th>
+                                <th>Context</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="interactionsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

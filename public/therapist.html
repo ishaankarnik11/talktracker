@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Therapist Dashboard - Talk Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #2563eb;
+            --primary-green: #059669;
+            --light-blue: #dbeafe;
+            --light-green: #d1fae5;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --red-500: #ef4444;
+            --orange-500: #f97316;
+            --amber-500: #f59e0b;
+            --emerald-500: #10b981;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-green));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .access-panel {
+            max-width: 500px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 1.5rem;
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--gray-800);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background-color: var(--emerald-500);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #059669;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--gray-100);
+            border-radius: 8px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-top: 0.25rem;
+        }
+
+        .filters-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .date-range {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .interactions-table {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        th {
+            background-color: var(--gray-50);
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        tr:hover {
+            background-color: var(--gray-50);
+        }
+
+        .type-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .type-discussion { background-color: #dbeafe; color: #1e40af; }
+        .type-disagreement { background-color: #fef3c7; color: #d97706; }
+        .type-debate { background-color: #fed7aa; color: #ea580c; }
+        .type-confrontation { background-color: #fecaca; color: #dc2626; }
+
+        .patterns-analysis {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .pattern-card {
+            background: var(--light-blue);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .pattern-title {
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .pattern-insight {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .error-message {
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            background-color: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .success-message {
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray-600);
+        }
+
+        .read-only-notice {
+            background: var(--light-green);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--primary-green);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--gray-800);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .stats-overview {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filters-section {
+                grid-template-columns: 1fr;
+            }
+
+            .date-range {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .patterns-analysis {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.75rem;
+            }
+
+            th, td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Therapist Dashboard</h1>
+            <p>Read-only view of client interaction data</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Access Panel -->
+        <div id="accessPanel" class="access-panel">
+            <h2>Access Client Data</h2>
+            <p style="margin-bottom: 1.5rem; color: var(--gray-600);">
+                Enter the client ID and access token to view their interaction data.
+            </p>
+            <div id="accessError" class="error-message hidden"></div>
+            <form id="accessForm">
+                <div class="form-group">
+                    <label for="clientId">Client ID:</label>
+                    <input type="number" id="clientId" class="form-control" required 
+                           placeholder="e.g., 1">
+                </div>
+                <div class="form-group">
+                    <label for="accessToken">Access Token:</label>
+                    <input type="text" id="accessToken" class="form-control" required
+                           placeholder="therapist-view-token">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Access Dashboard</button>
+            </form>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="dashboard">
+            <div class="read-only-notice">
+                <strong>Read-Only View:</strong> This dashboard provides therapeutic insights based on client interaction data. 
+                No modifications can be made to the client's records.
+            </div>
+
+            <div id="dashboardError" class="error-message hidden"></div>
+
+            <!-- Statistics Overview -->
+            <div class="card">
+                <h2>Interaction Summary</h2>
+                <div class="stats-overview">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalInteractions">0</div>
+                        <div class="stat-label">Total Interactions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="discussionCount">0</div>
+                        <div class="stat-label">Discussions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="disagreementCount">0</div>
+                        <div class="stat-label">Disagreements</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="debateCount">0</div>
+                        <div class="stat-label">Debates</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="confrontationCount">0</div>
+                        <div class="stat-label">Confrontations</div>
+                    </div>
+                </div>
+                <button id="exportBtn" class="btn btn-success btn-small">Export Report (CSV)</button>
+            </div>
+
+            <!-- Filters and Analysis Tools -->
+            <div class="card">
+                <h2>Analysis Filters</h2>
+                <div class="filters-section">
+                    <div class="form-group">
+                        <label>Date Range:</label>
+                        <div class="date-range">
+                            <input type="date" id="startDate" class="form-control">
+                            <span>to</span>
+                            <input type="date" id="endDate" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="filterType">Interaction Type:</label>
+                        <select id="filterType" class="form-control">
+                            <option value="">All Types</option>
+                            <option value="Discussion">Discussion</option>
+                            <option value="Disagreement">Disagreement</option>
+                            <option value="Debate">Debate</option>
+                            <option value="Confrontation">Confrontation</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filterPerson">Person Filter:</label>
+                        <input type="text" id="filterPerson" class="form-control" 
+                               placeholder="Filter by person name...">
+                    </div>
+                    <div class="form-group">
+                        <label for="searchKeyword">Keyword Search:</label>
+                        <input type="text" id="searchKeyword" class="form-control" 
+                               placeholder="Search in context, response, reflection...">
+                    </div>
+                </div>
+                <button id="applyFilters" class="btn btn-primary">Apply Filters</button>
+                <button id="clearFilters" class="btn btn-secondary" style="margin-left: 0.5rem;">Clear All</button>
+            </div>
+
+            <!-- Pattern Analysis -->
+            <div class="card">
+                <h2>Therapeutic Insights</h2>
+                <div id="patternsContainer" class="patterns-analysis">
+                    <div class="pattern-card">
+                        <div class="pattern-title">Interaction Distribution</div>
+                        <div class="pattern-insight" id="distributionInsight">
+                            Analysis will appear here after loading data...
+                        </div>
+                    </div>
+                    <div class="pattern-card">
+                        <div class="pattern-title">Frequent Interaction Partners</div>
+                        <div class="pattern-insight" id="partnersInsight">
+                            Analysis will appear here after loading data...
+                        </div>
+                    </div>
+                    <div class="pattern-card">
+                        <div class="pattern-title">Escalation Patterns</div>
+                        <div class="pattern-insight" id="escalationInsight">
+                            Analysis will appear here after loading data...
+                        </div>
+                    </div>
+                    <div class="pattern-card">
+                        <div class="pattern-title">Reflection Quality</div>
+                        <div class="pattern-insight" id="reflectionInsight">
+                            Analysis will appear here after loading data...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Interactions Table -->
+            <div class="card">
+                <h2>Detailed Interaction Records</h2>
+                <div class="interactions-table">
+                    <table id="interactionsTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Person</th>
+                                <th>Type</th>
+                                <th>Context</th>
+                                <th>Response</th>
+                                <th>Reflection</th>
+                            </tr>
+                        </thead>
+                        <tbody id="interactionsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+                <div id="loadingMessage" class="loading hidden">
+                    Loading interaction data...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="therapist.js"></script>
+</body>
+</html>
