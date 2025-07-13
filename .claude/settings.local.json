@@ -12,7 +12,9 @@
       "Bash(curl:*)",
       "Bash(move:*)",
       "Bash(mv:*)",
-      "Bash(set PORT=3003)"
+      "Bash(set PORT=3003)",
+      "Bash(cmd /c:*)",
+      "Bash(powershell:*)"
     ],
     "deny": []
   }
